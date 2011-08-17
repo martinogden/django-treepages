@@ -51,6 +51,11 @@
   text-align : center;
 }
 
+.treeTable tr.selected {
+  color: inherit;
+  text-align: inherit;
+}
+
 .treeTable tr.collapsed.selected td .expander, .treeTable tr.collapsed.accept td .expander {
   background-image: url(toggle-expand-light.png);
 }
