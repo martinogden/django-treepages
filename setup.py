@@ -12,13 +12,13 @@ except (IOError, OSError):
     reqs = ''
 
 setup(
-    name='django-tree-admin',
-    description='A way to handle hierarchical models in django.',
+    name='django-treepages',
+    description='A way to handle hierarchical flatpages in django.',
     long_description=long_description,
-    author='Corey Oordt',
-    author_email='coreyoordt@gmail.com',
+    author='Martin Ogden',
+    author_email='martin@cahoona.co.uk',
     include_package_data=True,
-    url='http://github.com/martinogden/django-tree-admin',
+    url='http://github.com/martinogden/django-treepages',
     packages=find_packages(),
     classifiers=[
         'Framework :: Django',
