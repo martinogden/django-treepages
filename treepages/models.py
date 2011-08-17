@@ -13,8 +13,9 @@ class BasePage(MPTTModel, models.Model):
     """
     Abstract model for easy extensibility
     """
-    class Meta:
+    class Meta(MPTTModel.Meta):
         abstract = True
+        ordering = ('tree_id', 'lft')
 
     STATUS_CHOICES = (
         (0, 'Draft'),
@@ -43,11 +44,12 @@ class BasePage(MPTTModel, models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        slug = slugify(self.title)
-        obj = self
-        while obj.parent:
-            slug = '%s/%s' % (slugify(obj.parent.title), slug)
-            obj = obj.parent
+        segments = [self.title]
+        parent = self.parent
+        while parent:
+            segments.append(parent.title)
+            parent = parent.parent
+        self.slug = '/%s/' % '/'.join([slugify(s) for s in reversed(segments)])
         return super(BasePage, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
