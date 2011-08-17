@@ -3,4 +3,4 @@ Originally forked from https://github.com/callowayproject/django-categories for 
 Installation
 ============
 
-pip install git+git://github.com/martinogden/django-tree-editor.git
+pip install git+git://github.com/martinogden/django-treepages.git
