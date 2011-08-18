@@ -10,8 +10,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
 
 from .models import Page
-
-DEFAULT_TEMPLATE = 'pages/default.html'
+from .settings import DEFAULT_TEMPLATE
 
 # This view is called from PageFallbackMiddleware.process_response
 # when a 404 is raised, which often means CsrfViewMiddleware.process_view
@@ -21,7 +20,7 @@ DEFAULT_TEMPLATE = 'pages/default.html'
 # or a redirect is required for authentication, the 404 needs to be returned
 # without any CSRF checks. Therefore, we only
 # CSRF protect the internal implementation.
-def Page(request, url):
+def page(request, url):
     """
     Public interface to the flat page view.
 
@@ -47,10 +46,10 @@ def Page(request, url):
             return HttpResponsePermanentRedirect('%s/' % request.path)
         else:
             raise
-    return render_Page(request, f)
+    return render_page(request, f)
 
 @csrf_protect
-def render_Page(request, f):
+def render_page(request, f):
     """
     Internal interface to the flat page view.
     """
@@ -59,8 +58,8 @@ def render_Page(request, f):
     if f.login_required and not request.user.is_authenticated():
         from django.contrib.auth.views import redirect_to_login
         return redirect_to_login(request.path)
-    if f.template_name:
-        t = loader.select_template((f.template_name, DEFAULT_TEMPLATE))
+    if f.template:
+        t = loader.select_template((f.template, DEFAULT_TEMPLATE))
     else:
         t = loader.get_template(DEFAULT_TEMPLATE)
 
@@ -68,10 +67,10 @@ def render_Page(request, f):
     # mark the title and content as already safe (since they are raw HTML
     # content in the first place).
     f.title = mark_safe(f.title)
-    f.content = mark_safe(f.copy)
+    f.copy = mark_safe(f.copy)
 
     c = RequestContext(request, {
-        'Page': f,
+        'page': f,
     })
     response = HttpResponse(t.render(c))
     populate_xheaders(request, response, Page, f.id)
