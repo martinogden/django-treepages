@@ -10,5 +10,6 @@ MEDIA_PATH = getattr(settings, 'EDITOR_MEDIA_PATH', '%seditor/' % STATIC_URL)
 
 TREE_INITIAL_STATE = getattr(settings, 'EDITOR_TREE_INITIAL_STATE', 'collapsed')
 
-_templates = (('pages/default.html', 'Default'),)
-TREEPAGES_TEMPLATES = getattr(settings, 'TREEPAGES_TEMPLATES', _templates)
+DEFAULT_TEMPLATE = 'pages/default.html'
+TREEPAGES_TEMPLATES = getattr(settings, 'TREEPAGES_TEMPLATES',
+                              [(DEFAULT_TEMPLATE, 'Default')])
