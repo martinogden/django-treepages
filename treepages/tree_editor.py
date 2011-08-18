@@ -1,7 +1,10 @@
 from django.conf import settings as django_settings
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.admin.util import unquote
 from django.contrib.admin.views.main import ChangeList
+from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.utils import simplejson
 from django.utils.safestring import mark_safe
@@ -42,6 +45,8 @@ def _build_tree_structure(cls):
     return all_nodes
 
 class TreeEditor(admin.ModelAdmin):
+    DIRECTIONS = ['up', 'down', 'left',  'right']
+
     list_per_page = 10000 # We can't have pagination
     class Media:
         css = {'all':(settings.MEDIA_PATH + "jquery.treeTable.css",)}
@@ -105,3 +110,49 @@ class TreeEditor(admin.ModelAdmin):
         """
         # Use default ordering, always
         return self.model._default_manager.get_query_set()
+
+    def get_urls(self):
+        return patterns('',
+            url(r'^(?P<pk>\d{1,6})/move/$', self.move_node_view,
+                name='treepages_page_move_node'),
+        ) + super(TreeEditor, self).get_urls()
+
+    def move_node_view(self, request, pk):
+        """
+        Move page nodes using MPTT
+        """
+        obj = get_object_or_404(self.model, pk=pk)
+        direction = request.GET.get('direction')
+
+        if direction in self.DIRECTIONS:
+            if direction == 'up':
+                target, position = obj.get_previous_sibling(), 'left'
+            elif direction == 'down':
+                target, position = obj.get_next_sibling(), 'right'
+            elif direction == 'left':
+                target, position = obj.parent, 'right'
+            elif direction == 'right':
+                target, position = obj.get_previous_sibling(), 'first-child'
+
+            if target and position:
+                obj.move_to(target, position=position)
+                obj.save()
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+    def move(self, obj):
+        """
+        Add movement links to change list view. Add this to admin live view
+        by adding 'move' to ModelAdmin#list_display.
+        """
+        arrows = {
+            'up': '&uarr;', 'down': '&darr;',
+            'left': '&larr;', 'right': '&rarr;'}
+        links = []
+        url = reverse('admin:treepages_page_move_node', kwargs={'pk': obj.pk})
+
+        for direction in self.DIRECTIONS:
+            arrow = arrows[direction]
+            links.append('<a href="%(url)s?direction=%(direction)s" '\
+                    'class="%(direction)s">%(arrow)s</a>' % locals())
+        return ' '.join(links)
+    move.allow_tags = True
