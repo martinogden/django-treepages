@@ -21,8 +21,10 @@ class BasePage(MPTTModel, models.Model):
         (0, 'Draft'),
         (1, 'Archive'),
         (2, 'Published'),
+        (3, 'In Navigation'),
     )
     ACTIVE_LEVEL = 2
+    NAVIGATION_LEVEL = 3
 
     parent = models.ForeignKey('self', related_name='children', **NULL)
 
