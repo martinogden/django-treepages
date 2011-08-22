@@ -23,8 +23,10 @@ class NavRecurseTreeNode(RecurseTreeNode):
         for child in node.get_children():
             context.update({'node': child, 'link': child.get_absolute_url()})
             bits.append(self._render_mptt_node(context, child))
-        context['node'] = node
-        context['children'] = mark_safe(u''.join(bits))
+        context.update({
+            'node': node,
+            'link': node.get_absolute_url(),
+            'children': mark_safe(u''.join(bits))})
         rendered = self.template_nodes.render(context)
         context.pop()
         return rendered
@@ -40,13 +42,14 @@ class NavRecurseTreeNode(RecurseTreeNode):
         bits = []
         context.push()
 
-        context.update({'node': node[0], 'link': node[1]})
         if len(node) == 3 and isinstance(node[2], list):
             for child in node[2]:
                 bits.append(self._render_node(context, child))
 
-        context['node'] = node[0]
-        context['children'] = mark_safe(u''.join(bits))
+        context.update({
+            'node': node[0],
+            'link': node[1],
+            'children': mark_safe(u''.join(bits))})
         rendered = self.template_nodes.render(context)
         context.pop()
         return rendered
